@@ -1,3 +1,10 @@
+app/ffmpeg
+app/media/audios/*
+app/media/cut/*
+app/app/media/audios/*
+app/app/media/cut/*
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
