@@ -223,6 +223,8 @@ async def audio_cut_to(message: Message, state: FSMContext):
             audio = audio.scalar_one()
             audio_url = audio.audio_url
 
+            os.makedirs('app/media/cut', exist_ok=True)
+
             random_name = str(randint(0, 9999999))
             while os.path.exists(f'app/media/cut/{random_name}.mp3'):
                 random_name = str(randint(0, 9999999))
