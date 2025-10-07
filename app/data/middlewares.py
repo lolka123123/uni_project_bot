@@ -15,12 +15,12 @@ class AnswerIfHasTagMiddleware(BaseMiddleware):
                        message: Message,
                        data: Dict[str, Any]) -> Any:
         if message.chat.id == message.from_user.id:
-            async with SessionLocal() as session:
-                user = await session.execute(select(tables.Admin).where(tables.Admin.user_id == message.from_user.id))
-                user = user.scalar_one_or_none()
-            if user:
-                return await handler(message, data)
-            return
+            # async with SessionLocal() as session:
+            #     user = await session.execute(select(tables.Admin).where(tables.Admin.user_id == message.from_user.id))
+            #     user = user.scalar_one_or_none()
+            # if user:
+            #     return await handler(message, data)
+            return await handler(message, data) # ВРЕМЕННО!!!!! ПОТОМ НАДО УБРАТЬ
         else:
             bot_info = await bot.get_me()
             if (message.text and f'@{bot_info.username}' in message.text) or \

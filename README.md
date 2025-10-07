@@ -25,10 +25,24 @@ Run this code in terminal
 
 docker-compose up -d --build
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# add this bot in telegram group and send '/admin@(telegram_username)' to have access to personal chat of bot
+# You should have admin rights to write something directly to the bot. Because, that bot was created to public use. (without admin rights bot will ignore all your messages)
 
-ALL COMMANDS
+- add this bot in your telegram group
+- send '/admin@(your_telegram_bot_username)' to have access to personal chat of bot
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!
+p.s i removed the administrator check, because of some misunderstandings.
+
+all of telegram users capable to ro write a private messages to the bot 
+
+
+----
+
+
+# ALL COMMANDS
 
 /start - to reset bot
 
@@ -47,7 +61,7 @@ just send them audio file to save it, mention bot if you send it in group
 
 
 
-# If you want run this code without Doker
+# If you want run this code without Docker
 Download 'ffmpeg-release-essentials.zip' from this site
 https://www.gyan.dev/ffmpeg/builds/
 
@@ -85,7 +99,7 @@ WITHOUT_DOCKER=True
 ----
 
 I DON'T RECOMMEND TO RUNNING THIS CODE WITHOUT DOCKER.
-This way so difficult and somthing can be wrong
+This way so difficult and something can be wrong
 
 
 

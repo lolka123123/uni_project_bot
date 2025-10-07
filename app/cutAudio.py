@@ -21,4 +21,17 @@ def cut_audio(audio_url, cut_from, cut_to, output_path):
     cut = audio[cut_from*1000:cut_to*1000]
     cut.export(output_path, format="mp3")
 
+def cut_audio_center(audio_url, cut_from, cut_to, output_path):
+    audio = AudioSegment.from_file(audio_url)
+
+    if cut_to > len(audio):
+        cut_to = len(audio)
+
+    before = audio[:cut_from]
+    after = audio[cut_to:]
+    result = before + after
+
+    result.export(output_path, format="mp3")
+
+
 
