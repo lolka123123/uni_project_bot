@@ -60,10 +60,12 @@ async def get_audio(message: Message):
         await session.commit()
         await session.refresh(new_audio)
 
+        audio_id = new_audio.id
+
 
     tags_text = ''
     if tags:
         for tag in tags:
             tags_text += f'{tag} '
-    await message.reply(f'Аудио: {message.audio.file_name}\nТеги: {tags_text}\nУспешно добавлен')
+    await message.reply(f'id: {audio_id}\nАудио: {message.audio.file_name}\nТеги: {tags_text}\nУспешно добавлен')
 

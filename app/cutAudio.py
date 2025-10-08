@@ -27,8 +27,8 @@ def cut_audio_center(audio_url, cut_from, cut_to, output_path):
     if cut_to > len(audio):
         cut_to = len(audio)
 
-    before = audio[:cut_from]
-    after = audio[cut_to:]
+    before = audio[:cut_from*1000]
+    after = audio[cut_to*1000:]
     result = before + after
 
     result.export(output_path, format="mp3")
