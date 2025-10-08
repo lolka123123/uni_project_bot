@@ -55,15 +55,20 @@ async def list(message: Message):
                 page_from, page_to = 0, 5
 
         audios = result.scalars().all()[page_from:page_to]
-
+        audios_names = {}
 
         for audio in audios:
+            audios_names[audio.id] = audio.audio_name
             files.append(InputMediaAudio(media=FSInputFile(audio.audio_url, f'{audio.id}. {audio.audio_name}')))
             views = int(audio.views)
             await session.execute(update(tables.Audio).where(tables.Audio.id == audio.id).values(views=views + 1))
             await session.commit()
     if files:
         await bot.send_media_group(chat_id, files, reply_to_message_id=message.message_id)
+        text = 'id ---- audios_name\n'
+        for k, v in audios_names.items():
+            text += f'{k}. {v}'
+        await message.answer(text)
     else:
         await message.reply('Ничего нет')
 
