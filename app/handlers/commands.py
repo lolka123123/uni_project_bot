@@ -67,7 +67,7 @@ async def list(message: Message):
         await bot.send_media_group(chat_id, files, reply_to_message_id=message.message_id)
         text = 'id ---- audios_name\n'
         for k, v in audios_names.items():
-            text += f'{k}. {v}'
+            text += f'{k}. {v}\n'
         await message.answer(text)
     else:
         await message.reply('Ничего нет')
