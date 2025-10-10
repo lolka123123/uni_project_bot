@@ -10,6 +10,7 @@ from app.database.settings import SessionLocal
 from app.database import tables
 from app.data import states
 from app.keyboards import inline
+from app.localization.settings import get_translate
 
 router = Router()
 
@@ -21,18 +22,35 @@ async def audio_settings(call: CallbackQuery, state: FSMContext):
     data = call.data.split('_')
     if data[0] == 'audioAddTag':
         audio_id = int(data[-1])
+        async with SessionLocal() as session:
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if not audio:
+                await call.message.delete()
+
         await state.set_state(states.AudioSettings.add_tag)
-        msg = await call.message.answer('Введите новый тег: ', reply_markup=inline.cancel_markup())
+        msg = await call.message.answer(get_translate('audio_settings_input_new_tag_add'), reply_markup=inline.cancel_markup())
         # msg = await bot.send_message(chat_id=call.message.chat.id, text='Введите тег: ', reply_markup=inline.cancel_markup(audio_id))
         await state.update_data(audio_id=audio_id, message_id=msg.message_id)
     elif data[0] == 'audioRemoveTag':
         audio_id = int(data[-1])
+        async with SessionLocal() as session:
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if not audio:
+                await call.message.delete()
+
         await state.set_state(states.AudioSettings.remove_tag)
-        msg = await call.message.answer('Введите тег: ', reply_markup=inline.cancel_markup())
+        msg = await call.message.answer(get_translate('audio_settings_input_tag_remove'), reply_markup=inline.cancel_markup())
         await state.update_data(audio_id=audio_id, message_id=msg.message_id)
     elif data[0] == 'audioRemoveAudio':
         audio_id = int(data[-1])
-        await call.message.edit_caption(caption='Вы точно хотите удалить?', reply_markup=inline.delete_audio(audio_id))
+        async with SessionLocal() as session:
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if not audio:
+                await call.message.delete()
+        await call.message.edit_caption(caption=get_translate('audio_settings_delete'), reply_markup=inline.delete_audio(audio_id))
 
 
     elif data[0] == 'cancel':
@@ -56,12 +74,15 @@ async def audio_settings(call: CallbackQuery, state: FSMContext):
             audio_tags = ''
             for tag in audio_tags_list:
                 audio_tags += f'{tag} '
-        await call.message.edit_caption(caption=f'Теги: {audio_tags}', reply_markup=inline.edit_audio(audio_id))
+        await call.message.edit_caption(caption=f'{get_translate("audio_settings_delete_cancel_tags")}: {audio_tags}', reply_markup=inline.edit_audio(audio_id))
     elif data[0] == 'deleteAudio':
         audio_id = int(data[-1])
         async with SessionLocal() as session:
-            await session.execute(delete(tables.Audio).where(tables.Audio.id == audio_id))
-            await session.commit()
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if audio:
+                await session.delete(audio)
+                await session.commit()
         await call.message.delete()
 
 
@@ -69,16 +90,26 @@ async def audio_settings(call: CallbackQuery, state: FSMContext):
 
     elif data[0] == 'audioCut':
         audio_id = int(data[-1])
+        async with SessionLocal() as session:
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if not audio:
+                await call.message.delete()
         await state.set_state(states.CutAudio.cut_from)
-        msg = await call.message.answer('Обрезать от:\nПример: минуты->1.42<-секунды', reply_markup=inline.cancel_markup())
+        msg = await call.message.answer(get_translate('audio_settings_cut_from'), reply_markup=inline.cancel_markup())
         await state.update_data(audio_id=audio_id, previous_message_id=msg.message_id)
     elif data[0] == 'cutSave':
         audio_id = int(data[1])
+        async with SessionLocal() as session:
+            result = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
+            audio = result.scalar_one_or_none()
+            if not audio:
+                await call.message.delete()
         random_name = int(data[2])
         async with SessionLocal() as session:
             audio = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id))
             audio = audio.scalar_one()
             audio_url = audio.audio_url
             os.replace(f'app/media/cut/{random_name}.mp3', audio_url)
-            await call.message.edit_caption('Сохранено', reply_markup=inline.empty())
+            await call.message.edit_caption(get_translate('audio_settings_saved'), reply_markup=inline.empty())
 

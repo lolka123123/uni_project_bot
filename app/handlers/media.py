@@ -7,6 +7,7 @@ import os
 from app.data.loader import bot
 from app.database.settings import SessionLocal
 from app.database import tables
+from app.localization.settings import get_translate
 
 from random import randint
 
@@ -67,5 +68,6 @@ async def get_audio(message: Message):
     if tags:
         for tag in tags:
             tags_text += f'{tag} '
-    await message.reply(f'id: {audio_id}\nАудио: {message.audio.file_name}\nТеги: {tags_text}\nУспешно добавлен')
+    await message.reply(f'id: {audio_id}\n{get_translate("get_audio_audio")}: {message.audio.file_name}\n'
+                        f'{get_translate("get_audio_tags")}: {tags_text}\n{get_translate("get_audio_created")}')
 

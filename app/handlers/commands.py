@@ -8,6 +8,7 @@ from app.data.loader import bot
 from app.database.settings import SessionLocal
 from app.database import tables
 from app.keyboards import reply
+from app.localization.settings import get_translate
 
 router = Router()
 
@@ -17,7 +18,7 @@ router = Router()
 async def start(message: Message, state: FSMContext):
     if message.chat.id == message.from_user.id:
         await state.clear()
-        await message.answer('(какойто текст)', reply_markup=reply.start_buttons())
+        await message.answer(get_translate('start_button'), reply_markup=reply.start_buttons())
 
 
 
@@ -70,7 +71,7 @@ async def list(message: Message):
             text += f'{k}. {v}\n'
         await message.answer(text)
     else:
-        await message.reply('Ничего нет')
+        await message.reply(get_translate('nothing'))
 
 
 
@@ -78,7 +79,7 @@ async def list(message: Message):
 
 @router.message(Command('help'))
 async def help(message: Message, state: FSMContext):
-    await message.answer('ИНСТРУКЦИЯ СКОРО (никогда)')
+    await message.answer(get_translate('command_help_text'))
 
 
 @router.message(Command('admin'))

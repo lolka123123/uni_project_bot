@@ -13,6 +13,7 @@ from app.database.settings import SessionLocal
 from app.database import tables
 from app.data import states
 from app.keyboards import inline
+from app.localization.settings import get_translate
 
 from app.cutAudio import cut_audio
 
@@ -22,11 +23,11 @@ router = Router()
 @router.message(F.text, StateFilter(None))
 async def main(message: Message, state: FSMContext):
     if message.chat.id == message.from_user.id:
-        if message.text == 'Edit audio':
-            msg = await message.answer('Введите audio id:', reply_markup=inline.cancel_markup())
+        if message.text == get_translate('reply_edit_audio'):
+            msg = await message.answer(get_translate('main_edit_audio_id'), reply_markup=inline.cancel_markup())
             await state.set_state(states.EditAudio.audio_id)
             await state.update_data(message_id=msg.message_id)
-        elif message.text == 'Tag list':
+        elif message.text == get_translate('reply_tag_list'):
             async with SessionLocal() as session:
                 tags = await session.execute(select(tables.Tag))
                 tags = tags.scalars().all()
@@ -35,8 +36,8 @@ async def main(message: Message, state: FSMContext):
                     tags_name += f'{tag.name} '
                 await message.answer(f'Все теги: \n{tags_name}')
 
-        elif message.text == 'Remove tag':
-            msg = await message.answer('Введите id тега:', reply_markup=inline.cancel_markup())
+        elif message.text == get_translate('reply_remove_tag'):
+            msg = await message.answer(get_translate('main_input_tag_to_remove'), reply_markup=inline.cancel_markup())
             await state.set_state(states.RemoveTag.audio_id)
             await state.update_data(message_id=msg.message_id)
 
@@ -51,7 +52,7 @@ async def edit_audio_id(message: Message, state: FSMContext):
                 tables.Audio.tags)))
             audio = audio.scalar_one_or_none()
             if not audio:
-                await message.answer('Audio не существует')
+                await message.answer(get_translate('audio_not_exist'))
             else:
                 audio_url = audio.audio_url
                 file = FSInputFile(audio_url)
@@ -65,20 +66,20 @@ async def edit_audio_id(message: Message, state: FSMContext):
                 await bot.delete_message(message.chat.id, message_id)
 
                 await state.clear()
-                await bot.send_audio(chat_id=message.chat.id, audio=file, caption=f'Теги: {audio_tags}', reply_to_message_id=message.message_id, reply_markup=inline.edit_audio(audio_id))
+                await bot.send_audio(chat_id=message.chat.id, audio=file, caption=f'{get_translate("audio_settings_delete_cancel_tags")}: {audio_tags}', reply_to_message_id=message.message_id, reply_markup=inline.edit_audio(audio_id))
     except:
-        await message.answer('Не верный id')
+        await message.answer(get_translate('audio_incorrect_id'))
 
 
 @router.message(F.text, states.RemoveTag.audio_id)
 async def remove_tag(message: Message, state: FSMContext):
-    tag_name = message.text
+    tag_name = message.text.lower()
     async with SessionLocal() as session:
         tag = await session.execute(select(tables.Tag).where(tables.Tag.name == tag_name))
         tag = tag.scalar_one_or_none()
 
         if not tag:
-            await message.answer(f'Тег "{tag_name}" не существует')
+            await message.answer(f'{get_translate("tag_not_exists_1")} "{tag_name}" {get_translate("tag_not_exists_2")}')
         else:
             await session.execute(delete(tables.Tag).where(tables.Tag.id == tag.id))
             await session.commit()
@@ -88,7 +89,7 @@ async def remove_tag(message: Message, state: FSMContext):
             await bot.delete_message(message.chat.id, message_id)
 
             await state.clear()
-            await message.answer(f'Тег "{tag_name}" удален')
+            await message.answer(f'{get_translate("tag_was_removed_1")} "{tag_name}" {get_translate("tag_was_removed_2")}')
 
 
 
@@ -96,7 +97,7 @@ async def remove_tag(message: Message, state: FSMContext):
 @router.message(F.text, states.AudioSettings.add_tag)
 async def audio_add_tag(message: Message, state: FSMContext):
     if ' ' in message.text:
-        await message.answer('Тег не должен содержать ПРОБЕЛ')
+        await message.answer(get_translate('tag_must_not_contain_spaces'))
     else:
         data = await state.get_data()
         audio_id = data['audio_id']
@@ -104,10 +105,10 @@ async def audio_add_tag(message: Message, state: FSMContext):
 
         async with SessionLocal() as session:
             audio = await session.execute(select(tables.Audio).where(tables.Audio.id == audio_id, tables.Audio.tags.any(
-                tables.Tag.name == message.text)))
+                tables.Tag.name == message.text.lower())))
             audio = audio.scalar_one_or_none()
             if audio:
-                await message.answer('Тег уже существует')
+                await message.answer(get_translate('tag_already_exists'))
             else:
                 tag_name = message.text.lower()
                 await bot.delete_message(message.chat.id, call_message_id)
@@ -128,7 +129,7 @@ async def audio_add_tag(message: Message, state: FSMContext):
 
                 await state.clear()
 
-                await message.answer(f'Тег "{tag_name}" добавлен')
+                await message.answer(f'{get_translate("tag_was_added_1")} "{tag_name}" {get_translate("tag_was_added_2")}')
                 # tag = await session.execute(select(tables.Tag).where())
 
 
@@ -136,7 +137,7 @@ async def audio_add_tag(message: Message, state: FSMContext):
 @router.message(F.text, states.AudioSettings.remove_tag)
 async def audio_remove_tag(message: Message, state: FSMContext):
     if ' ' in message.text:
-        await message.answer('Тег не должен содержать ПРОБЕЛ')
+        await message.answer(get_translate('tag_must_not_contain_spaces'))
     else:
         data = await state.get_data()
         audio_id = data['audio_id']
@@ -147,7 +148,7 @@ async def audio_remove_tag(message: Message, state: FSMContext):
                 tables.Tag.name == message.text)))
             audio = audio.scalar_one_or_none()
             if not audio:
-                await message.answer('Обьект не имеет данный тег')
+                await message.answer(get_translate('object_does_not_have_this_tag'))
             else:
                 await bot.delete_message(message.chat.id, call_message_id)
                 tag_id = await session.execute(select(tables.Tag).where(tables.Tag.name == message.text))
@@ -158,7 +159,7 @@ async def audio_remove_tag(message: Message, state: FSMContext):
 
                 await session.commit()
                 await state.clear()
-                await message.answer(f'Тег "{message.text.lower()}" удален')
+                await message.answer(f'{get_translate("tag_was_removed_1")} "{message.text.lower()}" {get_translate("tag_was_removed_2")}')
 
 
 @router.message(F.text, states.CutAudio.cut_from)
@@ -169,10 +170,10 @@ async def audio_cut_from(message: Message, state: FSMContext):
         seconds = int(timing[1])
 
         if minutes < 0 or seconds < 0:
-            await message.answer('Время не может быть отрицательным')
+            await message.answer(get_translate('time_can_not_be_negative'))
             return
         if seconds >= 60:
-            await message.answer('Секунд не может быть больше 60')
+            await message.answer(get_translate('seconds_cannot_be_more_than'))
             return
 
         cut_from = [minutes, seconds]
@@ -182,14 +183,14 @@ async def audio_cut_from(message: Message, state: FSMContext):
         await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=previous_message_id, reply_markup=inline.empty())
 
 
-        msg = await message.answer('Обрезать до: ', reply_markup=inline.cancel_markup())
+        msg = await message.answer(get_translate('cut_to'), reply_markup=inline.cancel_markup())
         await state.update_data(cut_from=cut_from, previous_message_id=msg.message_id)
         await state.set_state(states.CutAudio.cut_to)
 
 
     except Exception as e:
         print(e)
-        await message.answer('Чтото пошло не так')
+        await message.answer(get_translate('something_went_wrong'))
 
 @router.message(F.text, states.CutAudio.cut_to)
 async def audio_cut_to(message: Message, state: FSMContext):
@@ -199,10 +200,10 @@ async def audio_cut_to(message: Message, state: FSMContext):
         seconds = int(timing[1])
 
         if minutes < 0 or seconds < 0:
-            await message.answer('Время не может быть отрицательным')
+            await message.answer(get_translate('time_can_not_be_negative'))
             return
         if seconds >= 60:
-            await message.answer('Секунд не может быть больше 60')
+            await message.answer(get_translate('seconds_cannot_be_more_than'))
             return
 
         cut_to = [minutes, seconds]
@@ -238,4 +239,4 @@ async def audio_cut_to(message: Message, state: FSMContext):
             await bot.send_audio(message.chat.id, file, reply_markup=inline.cut_audio(audio_id, audio_name=random_name))
     except Exception as e:
         print(e)
-        await message.answer('Чтото пошло не так')
+        await message.answer(get_translate('something_went_wrong'))

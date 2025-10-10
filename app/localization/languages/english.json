@@ -1,0 +1,48 @@
+{
+  "language": "English",
+  "start_button": "(some kind of text)",
+  "nothing": "Nothing",
+  "command_help_text": "guide will be soon... (never)",
+
+  "get_audio_audio": "Audio",
+  "get_audio_tags": "Tags",
+  "get_audio_created": "New media is created",
+
+  "audio_settings_input_new_tag_add": "Input new tag:",
+  "audio_settings_input_tag_remove": "Input tag:",
+  "audio_settings_delete": "Delete audio?",
+  "audio_settings_delete_cancel_tags": "Tags",
+  "audio_settings_cut_from": "Cut from:\nExemple: minutes-> 1.42 <-seconds",
+  "audio_settings_saved": "Saved",
+
+  "main_edit_audio_id": "Input audio id:",
+  "main_input_tag_to_remove": "Input tag:",
+
+  "inline_cancel": "Cancel",
+  "inline_cut": "Cut",
+  "inline_remove_audio": "Remove audio",
+  "inline_add_tag": "Add tag",
+  "inline_remove_tag": "Remove tag",
+  "inline_delete": "Delete",
+  "inline_save": "Save",
+
+  "audio_not_exist": "Audio not exist",
+  "audio_incorrect_id": "Incorrect id",
+  "tag_not_exists_1": "Tag",
+  "tag_not_exists_2": "not exist",
+  "tag_was_removed_1": "Tag",
+  "tag_was_removed_2": "was removed",
+  "tag_must_not_contain_spaces": "The tag must not contain SPACES",
+  "tag_already_exists": "Tag already exists",
+  "tag_was_added_1": "Tag",
+  "tag_was_added_2": "was added",
+  "object_does_not_have_this_tag": "The object does not have this tag",
+  "time_can_not_be_negative": "Time can not be negative",
+  "seconds_cannot_be_more_than": "Seconds cannot be more than 59",
+  "cut_to": "Cut to: ",
+  "something_went_wrong": "Something went wrong",
+
+  "reply_edit_audio": "Edit audio",
+  "reply_tag_list": "Tag list",
+  "reply_remove_tag": "Remove tag"
+}
